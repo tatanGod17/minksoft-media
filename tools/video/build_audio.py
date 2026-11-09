@@ -18,8 +18,8 @@ KDIR = os.environ.get("KOKORO_DIR", os.path.expanduser("~/kokoro"))
 
 from kokoro_onnx import Kokoro
 k = Kokoro(os.path.join(KDIR, "kokoro-v1.0.onnx"), os.path.join(KDIR, "voices-v1.0.bin"))
-voice = spec.get("voice", "em_alex")
-speed = float(spec.get("speed", 1.12))
+voice = spec.get("voice", "ef_dora")
+speed = float(spec.get("speed", 0.98))
 
 def tts(text):
     s, sr = k.create(text, voice=voice, speed=speed, lang="es")

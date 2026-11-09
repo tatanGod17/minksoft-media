@@ -16,14 +16,21 @@ bash tools/video/mix.sh ~/v1 ~/v1/final.mp4      # mezcla y MP4 final
 
 ## video.json
 ```json
-{"voice":"em_alex","speed":1.12,"mood":"tech|misterio|epico","bpm":112,"tag":"Dato curioso",
+{"voice":"ef_dora","speed":0.98,"bg":"map","focus":"bogota","floats":[],"mood":"tech|misterio|epico","bpm":112,"tag":"Dato curioso",
  "css":"(opcional, CSS extra)",
  "scenes":[{"type":"hook","emoji":"🤯","text":"Texto con *dorado* y _celeste_","say":"Lo que dice la voz","caption":"(opcional) subtítulo escrito si say usa pronunciación fonética","sfx":"boom|ding|glitch"}]}
 ```
-Voces en español: `em_alex` (hombre, por defecto), `ef_dora` (mujer), `em_santa`.
+Voz por defecto: `ef_dora` a 0.98 (suave y pausada, aprobada por el usuario). Alternativas: `em_alex`, `em_santa`.
 Escribe `say` como se pronuncia ("punto com", "Mink Soft", "inteligencia artificial", números en palabras si son raros) y pon `caption` con la forma escrita.
 
-Campos comunes de escena: `say`, `caption`, `captions:false`, `cap_words`, `pre`, `post`, `min_dur`, `sfx`, `emoji`, `onseek` (JS: `el, lt, sc`).
+Campos comunes de escena: `say`, `caption`, `captions:false`, `cap_words`, `pre`, `post`, `min_dur`, `sfx`, `emoji`, `hero`, `bg`, `floats`, `onseek` (JS: `el, lt, sc`).
+
+### Fondos e imágenes (obligatorio: nunca dejar solo el plano azul)
+- `bg` (por escena o global): `map` (mapa mundial con conexiones; `focus`: bogota, ny, sf, madrid, london, tokio, saopaulo, cdmx, sydney, dubai, lagos, mumbai), `city` (ciudad de noche), `servers` (centro de datos), `circuit` (circuito con pulsos), `code` (código en movimiento), `retro` (estética años 80), o `img:archivo.jpg` (foto propia copiada a la carpeta del video). Cambia de fondo entre escenas; hacen fundido automático.
+- `hero`: imagen 3D grande sobre el texto (reemplaza a `emoji`).
+- `floats`: hasta 4 íconos 3D flotando en las esquinas.
+- Íconos 3D: Microsoft Fluent Emoji (licencia MIT), nombre en snake_case de la carpeta de github.com/microsoft/fluentui-emoji/tree/main/assets (p. ej. `desktop_computer`, `floppy_disk`, `globe_with_meridians`, `robot`, `rocket`, `money_bag`, `shopping_cart`, `credit_card`, `mobile_phone`, `laptop`, `locked`, `satellite_antenna`, `light_bulb`, `chart_increasing`, `package`, `brain`, `gear`, `cloud`, `magnifying_glass_tilted_left`, `warning`). render.js los descarga; si un nombre no existe, falla y lo dice. Nada de íconos de personas.
+- Internet: desde la nube solo hay acceso a GitHub y npm, no a bancos de fotos; si el usuario sube fotos, úsalas con `bg: "img:..."`.
 
 | type | campos |
 |---|---|
