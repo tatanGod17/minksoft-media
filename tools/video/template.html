@@ -79,7 +79,7 @@ body{font-family:Poppins,"Noto Color Emoji",sans-serif;color:#fff;position:relat
 .mapw{position:absolute;left:0;top:0;width:1600px;height:830px;transform-origin:0 0}
 .mapw img{position:absolute;inset:0;width:100%;height:100%;opacity:.75}
 .mapw svg{position:absolute;inset:0;overflow:visible}
-.codecol{position:absolute;top:0;width:330px;overflow:hidden;font-family:"DejaVu Sans Mono",monospace;font-size:26px;line-height:1.5;white-space:pre;color:#A9C8FF;opacity:.5}
+.codecol{position:absolute;top:0;width:330px;overflow:hidden;font-family:"DejaVu Sans Mono",monospace;font-size:26px;line-height:1.5;white-space:pre;color:#A9C8FF;opacity:.3}
 .flt{position:absolute;filter:drop-shadow(0 20px 30px rgba(0,0,0,.45))}
 .hero{width:330px;height:330px;margin-bottom:26px;filter:drop-shadow(0 30px 50px rgba(0,0,0,.5))}
 .hero img{width:100%;height:100%}
@@ -176,8 +176,7 @@ function buildBg(kind){
 const bgCache={};
 const bgOf=V.scenes.map(sc=>{const k=sc.bg??V.meta.bg??'';if(!k)return null;if(!bgCache[k])bgCache[k]=buildBg(k);return k});
 // íconos 3D flotantes por escena
-const SLOTS=[[50,280,180],[850,300,170],[40,1090,170],[860,1070,180]];
-const fltEls=V.scenes.map((sc,i)=>{const names=sc.floats??V.meta.floats??[];return names.map((n,j)=>{const im=document.createElement('img');im.className='flt';im.src='fl_'+n+'.png';const s=SLOTS[(j+i*2)%SLOTS.length];im.style.width=im.style.height=s[2]+'px';im.style.left=s[0]+'px';im.style.top=s[1]+'px';im.style.opacity=0;$('#floats').appendChild(im);return im})});
+let fltEls=[];
 // construir escenas
 const els = V.scenes.map((sc,i)=>{
   const el=document.createElement('div');el.className='scene '+sc.type;let h='';
@@ -195,6 +194,16 @@ const els = V.scenes.map((sc,i)=>{
   else if(sc.type==='custom'){h=sc.html}
   el.innerHTML=h;$('#stage').appendChild(el);return el;
 });
+// íconos 3D flotantes por escena: solo en huecos que no tapen el contenido
+const SLOTS=[[50,280,180],[850,300,170],[40,1090,170],[860,1070,180],[30,620,150],[900,640,150]];
+const hit=(a,b,m=24)=>!(a.x+a.w+m<b.left||b.right+m<a.x||a.y+a.w+m<b.top||b.bottom+m<a.y);
+fltEls=V.scenes.map((sc,i)=>{const names=sc.floats??V.meta.floats??[];
+  const el=els[i];el.style.visibility='hidden';el.style.opacity=1;
+  const rs=[...el.querySelectorAll(':scope > *')].map(c=>c.getBoundingClientRect()).filter(r=>r.width>0);
+  el.style.opacity=0;
+  const order=SLOTS.map((s2,k)=>SLOTS[(k+i*2)%4<4&&k<4?(k+i*2)%4:k]);
+  const free=order.filter(([x,y,w])=>!rs.some(r=>hit({x,y,w},r)));
+  return names.slice(0,free.length).map((n,j)=>{const im=document.createElement('img');im.className='flt';im.src='fl_'+n+'.png';const s=free[j];im.style.width=im.style.height=s[2]+'px';im.style.left=s[0]+'px';im.style.top=s[1]+'px';im.style.opacity=0;$('#floats').appendChild(im);return im})});
 function seek(t){
   const T=V.total;
   $('#bar').style.width=(100*t/T)+'%';
