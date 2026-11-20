@@ -16,13 +16,32 @@ d = sys.argv[1]
 spec = json.load(open(os.path.join(d, "video.json"), encoding="utf-8"))
 KDIR = os.environ.get("KOKORO_DIR", os.path.expanduser("~/kokoro"))
 
-from kokoro_onnx import Kokoro
-k = Kokoro(os.path.join(KDIR, "kokoro-v1.0.onnx"), os.path.join(KDIR, "voices-v1.0.bin"))
-voice = spec.get("voice", "ef_dora")
-speed = float(spec.get("speed", 0.98))
+voice = spec.get("voice", "piper:es_ES-davefx-medium")
+speed = float(spec.get("speed", 1.0))
+
+if voice.startswith("piper:"):
+    # Voces Piper (p. ej. "piper:es_ES-davefx-medium"); modelos en $PIPER_DIR/vits-piper-<nombre>/
+    from piper import PiperVoice, SynthesisConfig
+    PDIR = os.environ.get("PIPER_DIR", os.path.expanduser("~/tts"))
+    pname = voice.split(":", 1)[1]
+    pv = PiperVoice.load(os.path.join(PDIR, "vits-piper-" + pname, pname + ".onnx"))
+    pcfg = SynthesisConfig(length_scale=1.0 / speed, speaker_id=spec.get("speaker_id"))
+    def _raw(text):
+        ch = list(pv.synthesize(text, syn_config=pcfg))
+        s = np.concatenate([c.audio_float_array for c in ch])
+        sr = ch[0].sample_rate
+        if sr != SR:  # remuestreo lineal a 24 kHz
+            x = np.arange(0, len(s) * SR / sr) * sr / SR
+            s = np.interp(x, np.arange(len(s)), s)
+        return s.astype(np.float32), SR
+else:
+    from kokoro_onnx import Kokoro
+    k = Kokoro(os.path.join(KDIR, "kokoro-v1.0.onnx"), os.path.join(KDIR, "voices-v1.0.bin"))
+    def _raw(text):
+        return k.create(text, voice=voice, speed=speed, lang="es")
 
 def tts(text):
-    s, sr = k.create(text, voice=voice, speed=speed, lang="es")
+    s, sr = _raw(text)
     assert sr == SR
     # recorta silencios de los extremos
     a = np.abs(s); idx = np.where(a > 0.01)[0]

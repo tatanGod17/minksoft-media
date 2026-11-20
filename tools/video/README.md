@@ -1,7 +1,7 @@
 # Videos MinkSoft (Reels / TikTok / Shorts)
 
 Pipeline 100 % en la nube: guion → voz (Kokoro TTS, local) → animación HTML (Playwright) → mezcla (ffmpeg).
-Resultado: MP4 1080x1920, 30 fps, H.264 + AAC, ~-14 LUFS. Música y efectos sintetizados (sin derechos de terceros).
+Resultado: MP4 1080x1920, 30 fps, H.264 High 4.2 (CRF 14, preset slow, BT.709, hasta 20 Mbps) + AAC 192k 48 kHz, ~-14 LUFS. Calidad alta para que Instagram/TikTok no la degraden. Música y efectos sintetizados (sin derechos de terceros).
 
 ## Uso
 ```bash
@@ -16,11 +16,12 @@ bash tools/video/mix.sh ~/v1 ~/v1/final.mp4      # mezcla y MP4 final
 
 ## video.json
 ```json
-{"voice":"ef_dora","speed":0.98,"bg":"map","focus":"bogota","floats":[],"mood":"tech|misterio|epico","bpm":112,"tag":"Dato curioso",
+{"voice":"piper:es_ES-davefx-medium","speed":1.0,"bg":"map","focus":"bogota","floats":[],"mood":"tech|misterio|epico","bpm":112,"tag":"Dato curioso",
  "css":"(opcional, CSS extra)",
  "scenes":[{"type":"hook","emoji":"🤯","text":"Texto con *dorado* y _celeste_","say":"Lo que dice la voz","caption":"(opcional) subtítulo escrito si say usa pronunciación fonética","sfx":"boom|ding|glitch"}]}
 ```
-Voz por defecto: `ef_dora` a 0.98 (suave y pausada, aprobada por el usuario). Alternativas: `em_alex`, `em_santa`.
+**Voz por defecto (desde 2026-11-20, elegida por el usuario): `"voice":"piper:es_ES-davefx-medium"`, `"speed":1.0`** — masculina, acento español, más natural (Piper, se instala con setup.sh).
+Otras: `piper:es_MX-ald-medium` (México), Kokoro `ef_dora` (femenina, la anterior), `em_alex`, `em_santa`. Con Piper conviene escribir en `say` los anglicismos como se pronuncian: "Blútuz", "Áutluk", "Tims", "Radio Uáier", "inteligencia artificial" en vez de "IA".
 Escribe `say` como se pronuncia ("punto com", "Mink Soft", "inteligencia artificial", números en palabras si son raros) y pon `caption` con la forma escrita.
 
 Campos comunes de escena: `say`, `caption`, `captions:false`, `cap_words`, `pre`, `post`, `min_dur`, `sfx`, `emoji`, `hero`, `bg`, `floats`, `onseek` (JS: `el, lt, sc`).

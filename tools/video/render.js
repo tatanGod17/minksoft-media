@@ -43,10 +43,13 @@ fs.writeFileSync(path.join(dir, 'page.html'), html);
   const fps = tl.fps || 30, n = Math.ceil(tl.total * fps);
   const tmp = path.join(dir, 'video_noaudio.tmp.mp4');
   const ff = spawn('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-framerate', String(fps), '-c:v', 'mjpeg', '-i', '-',
-    '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '19', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', tmp], { stdio: ['pipe', 'inherit', 'inherit'] });
+    '-vf', 'scale=in_color_matrix=bt601:in_range=full:out_color_matrix=bt709:out_range=tv,format=yuv420p',
+    '-c:v', 'libx264', '-preset', 'slow', '-crf', '14', '-tune', 'animation', '-profile:v', 'high', '-level', '4.2',
+    '-maxrate', '20M', '-bufsize', '40M', '-g', '60', '-bf', '2',
+    '-colorspace', 'bt709', '-color_primaries', 'bt709', '-color_trc', 'bt709', '-color_range', 'tv', '-movflags', '+faststart', tmp], { stdio: ['pipe', 'inherit', 'inherit'] });
   for (let i = 0; i < n; i++) {
     await p.evaluate(t => seek(t), i / fps);
-    const buf = await p.screenshot({ type: 'jpeg', quality: 92 });
+    const buf = await p.screenshot({ type: 'jpeg', quality: 100 });
     if (!ff.stdin.write(buf)) await new Promise(r => ff.stdin.once('drain', r));
     if (i % 150 === 0) console.log(`frame ${i}/${n}`);
   }
