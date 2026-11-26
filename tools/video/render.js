@@ -23,7 +23,8 @@ for (const n of names) {
 }
 let html = fs.readFileSync(path.join(here, 'template.html'), 'utf8');
 const extraCss = tl.meta.css ? `<style>${tl.meta.css}</style>` : '';
-html = html.replace('<script>', `${extraCss}<script>window.VIDEO=${JSON.stringify(tl)};</script>\n<script>`);
+const scenesJs = fs.readFileSync(path.join(here, 'scenes.js'), 'utf8');
+html = html.replace('<script>', () => `${extraCss}<script>window.VIDEO=${JSON.stringify(tl)};</script>\n<script>${scenesJs}</script>\n<script>`);
 fs.writeFileSync(path.join(dir, 'page.html'), html);
 (async () => {
   const b = await chromium.launch();

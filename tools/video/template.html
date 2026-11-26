@@ -87,6 +87,11 @@ body{font-family:Poppins,"Noto Color Emoji",sans-serif;color:#fff;position:relat
 #cap{position:absolute;left:60px;right:60px;top:1350px;display:flex;justify-content:center;z-index:15}
 #cap span{display:inline-block;font-size:70px;font-weight:800;line-height:1.15;text-align:center;padding:14px 34px;border-radius:26px;background:rgba(8,12,40,.78);box-shadow:0 10px 40px rgba(0,0,0,.35);max-width:960px}
 #cap b{color:var(--oro)}
+/* legibilidad sobre escenarios ilustrados */
+.scene .t,.scene .title,.scene .v,.scene .l,.scene .q,.col h3{text-shadow:0 6px 30px rgba(5,8,30,.85),0 2px 6px rgba(5,8,30,.7)}
+.statement .s,.stat .s,.stat .l,.end .c,.typed-sub,.chart .typed-sub{background:rgba(8,12,40,.74);padding:14px 28px;border-radius:24px}
+.col.a{background:rgba(8,12,40,.72)}
+.item{background:rgba(8,12,40,.72)}
 #flash{position:absolute;inset:0;background:#fff;opacity:0;z-index:30;pointer-events:none}
 </style></head><body>
 <div id="bg"></div><div id="grid"></div><div id="bgs"></div><div id="dim"></div><div id="glow"></div><div id="dots"></div><div id="floats"></div>
@@ -132,6 +137,7 @@ git commit -m "nueva tienda online"
 npm run build && deploy --prod
 `;
 function buildBg(kind){
+  if(window.ESCENAS&&ESCENAS.has(kind)){const r=ESCENAS.build(kind);r.esc=true;$('#bgs').appendChild(r.L);return r}
   const L=document.createElement('div');L.className='bgl';let upd=()=>{};
   if(kind==='map'){
     const w=document.createElement('div');w.className='mapw';
@@ -213,7 +219,9 @@ function seek(t){
   let fl=0;
   // fondos: el de la escena actual entra con fundido sobre el anterior
   const act={};V.scenes.forEach((sc,i)=>{const k=bgOf[i];if(!k)return;const lt=t-sc.start;if(lt>=0&&lt<sc.dur+0.35){const o=lt<sc.dur?clamp(lt/0.35+(i===0?1:0)):1;act[k]=Math.max(act[k]||0,o);bgCache[k].lt=lt}});
-  let z=0;Object.entries(bgCache).forEach(([k,b])=>{const o=act[k]||0;b.L.style.opacity=o;b.L.style.zIndex=(o>0&&o<1)?2:1;if(o>0)b.upd(b.lt||0,t)});
+  let z=0,eo=0;Object.entries(bgCache).forEach(([k,b])=>{const o=act[k]||0;b.L.style.opacity=o;b.L.style.zIndex=(o>0&&o<1)?2:1;if(o>0)b.upd(b.lt||0,t);if(b.esc)eo=Math.max(eo,o)});
+  // con escenario ilustrado: sin cuadrícula ni puntos, y un poco menos de oscurecido
+  $('#grid').style.opacity=1-eo;$('#dots').style.opacity=1-eo;$('#glow').style.opacity=1-0.6*eo;$('#dim').style.opacity=1-0.15*eo;
   fltEls.forEach((arr,i)=>{const sc=V.scenes[i],lt=t-sc.start;arr.forEach((im,j)=>{const on=lt>=0&&lt<sc.dur;if(!on){im.style.opacity=0;return}const q=eBack((lt-0.1-j*0.12)/0.5);im.style.opacity=clamp((lt-0.1-j*0.12)/0.2)*0.95;im.style.transform=`translateY(${Math.sin(lt*1.6+j)*18}px) rotate(${Math.sin(lt*1.1+j*2)*8}deg) scale(${q})`})});
   V.scenes.forEach((sc,i)=>{
     const el=els[i],lt=t-sc.start,on=lt>=0&&lt<sc.dur;
