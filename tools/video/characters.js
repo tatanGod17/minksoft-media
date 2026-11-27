@@ -31,6 +31,7 @@
     pirata: { camisa: '#f4f1e8', pantalon: '#1f1a17', zapatos: '#3a2a1e', sombrero: 'pirata', parche: true, barba: 'corta', color_pelo: 'negro', cinturon: '#d9433b', pelo: 'largo', objeto: 'catalejo' },
     ceo: { camisa: '#1a1a1f', pantalon: '#22242e', zapatos: '#101010', chaqueta: '#202027', pelo: 'corto', color_pelo: '#5b5d66', piel: 'media' },
     espia: { figura: 'mujer', camisa: '#2b2f45', pantalon: '#2b2f45', zapatos: '#101010', gabardina: '#6a7396', panuelo: '#d9433b', sombrero: 'detective', gafas: 'sol', pelo: 'largo', color_pelo: 'negro', expresion: 'serio' },
+    policia: { camisa: '#1f2f7a', pantalon: '#101943', zapatos: '#101010', sombrero: 'policia', corbata: '#101943', pelo: 'corto', manga: 'larga', cinturon: '#101010' },
     detective: { camisa: '#a07850', pantalon: '#5a3a22', zapatos: '#3a2a1e', gabardina: '#a07850', sombrero: 'detective', pelo: 'corto', objeto: 'lupa' },
   };
   const POSES = { // [ángulo brazo izq, codo izq, ángulo brazo der, codo der]
@@ -152,6 +153,7 @@
     if (hat === 'vikingo') top += `<path d="M-84,-680 A84,84 0 0 1 84,-680Z" fill="#9aa7c7"/><rect x="-88" y="-690" width="176" height="18" rx="6" fill="#7d8bb0"/><rect x="-8" y="-760" width="16" height="80" fill="#7d8bb0"/><path d="M-78,-700 C-120,-710 -134,-760 -118,-790 C-112,-752 -96,-730 -70,-724Z" fill="#f3ead8"/><path d="M78,-700 C120,-710 134,-760 118,-790 C112,-752 96,-730 70,-724Z" fill="#f3ead8"/>`;
     if (hat === 'chef') top += `<rect x="-60" y="-760" width="120" height="60" fill="#f4f6fb"/><circle cx="-45" cy="-780" r="40" fill="#f4f6fb"/><circle cx="0" cy="-800" r="46" fill="#f4f6fb"/><circle cx="45" cy="-780" r="40" fill="#f4f6fb"/><rect x="-64" y="-712" width="128" height="16" fill="#e6eaf5"/>`;
     if (hat === 'casco_obra') top += `<path d="M-86,-680 Q-86,-772 0,-774 Q86,-772 86,-680Z" fill="${C.oro}"/><rect x="-100" y="-690" width="200" height="18" rx="9" fill="${shade(C.oro, 0.85)}"/><rect x="-10" y="-772" width="20" height="90" fill="${shade(C.oro, 0.9)}"/>`;
+    if (hat === 'policia') top += `<path d="M-84,-694 L-112,-756 Q0,-790 112,-756 L84,-694Z" fill="${C.navy2}"/><rect x="-88" y="-702" width="176" height="30" rx="6" fill="#101010"/><rect x="-88" y="-694" width="176" height="6" fill="${C.oro}"/><path d="M0,-748 L18,-738 L14,-716 L0,-708 L-14,-716 L-18,-738Z" fill="${C.oro}"/><path d="M-86,-674 Q0,-640 86,-674 L86,-664 Q0,-628 -86,-664Z" fill="#0a0a0a"/>`;
     if (hat === 'gorra') top += `<path d="M-82,-672 Q-82,-758 0,-760 Q82,-758 82,-672Z" fill="${C.navy2}"/><path d="M20,-676 L140,-670 Q140,-656 120,-656 L20,-660Z" fill="${C.navy}"/><circle cx="0" cy="-760" r="8" fill="${C.oro}"/>`;
     if (hat === 'pirata') top += `<path d="M-130,-690 Q0,-650 130,-690 Q110,-790 0,-800 Q-110,-790 -130,-690Z" fill="#1f1a17"/><path d="M-20,-740 l20,-14 l20,14 l-20,14Z" fill="#f4f1e8"/>`;
     if (hat === 'detective') top += `<ellipse cx="0" cy="-696" rx="120" ry="22" fill="${shade(P.gabardina || '#a07850', 0.6)}"/><path d="M-70,-696 Q-72,-780 0,-784 Q72,-780 70,-696Z" fill="${shade(P.gabardina || '#a07850', 0.6)}"/><rect x="-70" y="-716" width="140" height="16" fill="#1f1a17"/>`;
