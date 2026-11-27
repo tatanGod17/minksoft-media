@@ -8,7 +8,7 @@ for (const f of fs.readdirSync(path.join(here, 'assets'))) fs.copyFileSync(path.
 tl.meta._cities = JSON.parse(fs.readFileSync(path.join(here, 'assets', 'worldmap_cities.json'), 'utf8'));
 // íconos 3D de Microsoft Fluent Emoji (licencia MIT): nombres en snake_case, p. ej. "floppy_disk"
 const names = new Set([...(tl.meta.floats || [])]);
-for (const sc of tl.scenes) { if (sc.hero) names.add(sc.hero); for (const n of (sc.floats || [])) names.add(n); }
+for (const sc of tl.scenes) { if (sc.hero && typeof sc.hero === 'string' && !sc.hero.startsWith('char:')) names.add(sc.hero); for (const n of (sc.floats || [])) names.add(n); }
 const cache = path.join(require('os').homedir(), '.cache', 'fluent'); fs.mkdirSync(cache, { recursive: true });
 const { execFileSync } = require('child_process');
 for (const n of names) {
@@ -23,7 +23,7 @@ for (const n of names) {
 }
 let html = fs.readFileSync(path.join(here, 'template.html'), 'utf8');
 const extraCss = tl.meta.css ? `<style>${tl.meta.css}</style>` : '';
-const scenesJs = fs.readFileSync(path.join(here, 'scenes.js'), 'utf8');
+const scenesJs = fs.readFileSync(path.join(here, 'scenes.js'), 'utf8') + '\n' + fs.readFileSync(path.join(here, 'characters.js'), 'utf8');
 html = html.replace('<script>', () => `${extraCss}<script>window.VIDEO=${JSON.stringify(tl)};</script>\n<script>${scenesJs}</script>\n<script>`);
 fs.writeFileSync(path.join(dir, 'page.html'), html);
 (async () => {

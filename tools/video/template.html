@@ -92,9 +92,11 @@ body{font-family:Poppins,"Noto Color Emoji",sans-serif;color:#fff;position:relat
 .statement .s,.stat .s,.stat .l,.end .c,.typed-sub,.chart .typed-sub{background:rgba(8,12,40,.74);padding:14px 28px;border-radius:24px}
 .col.a{background:rgba(8,12,40,.72)}
 .item{background:rgba(8,12,40,.72)}
+#chars{position:absolute;inset:0;pointer-events:none}
+.hero.char{width:auto;height:auto;filter:drop-shadow(0 24px 40px rgba(0,0,0,.45))}
 #flash{position:absolute;inset:0;background:#fff;opacity:0;z-index:30;pointer-events:none}
 </style></head><body>
-<div id="bg"></div><div id="grid"></div><div id="bgs"></div><div id="dim"></div><div id="glow"></div><div id="dots"></div><div id="floats"></div>
+<div id="bg"></div><div id="grid"></div><div id="bgs"></div><div id="dim"></div><div id="glow"></div><div id="dots"></div><div id="floats"></div><div id="chars"></div>
 <div id="bar"></div>
 <img id="wm" src="logo-pantera-blanco.png" alt="">
 <div id="tag"></div>
@@ -186,7 +188,8 @@ let fltEls=[];
 // construir escenas
 const els = V.scenes.map((sc,i)=>{
   const el=document.createElement('div');el.className='scene '+sc.type;let h='';
-  const em = sc.hero?`<div class="hero"><img src="fl_${sc.hero}.png"></div>`:(sc.emoji?`<div class="big-emoji">${sc.emoji}</div>`:'');
+  const heroChar = sc.hero && (typeof sc.hero==='object' || String(sc.hero).startsWith('char:'));
+  const em = heroChar?`<div class="hero char"></div>`:sc.hero?`<div class="hero"><img src="fl_${sc.hero}.png"></div>`:(sc.emoji?`<div class="big-emoji">${sc.emoji}</div>`:'');
   if(sc.type==='hook'){h=em+`<div class="t">${md(sc.text).split(/(<span.*?<\/span>|\s+)/).filter(x=>x&&x.trim()).map(w=>`<span class="w">${w}</span>`).join('')}</div>`}
   else if(sc.type==='stat'){h=em+`<div class="v" data-v="${sc.value}">0</div><div class="l">${md(sc.label)}</div>`+(sc.sub?`<div class="s">${md(sc.sub)}</div>`:'')}
   else if(sc.type==='bullets'){h=(sc.title?`<div class="title">${md(sc.title)}</div>`:'')+`<div class="items">${sc.items.map(it=>`<div class="item"><div class="e">${it.icon||'✅'}</div><div class="x">${md(it.text)}</div></div>`).join('')}</div>`}
@@ -198,7 +201,9 @@ const els = V.scenes.map((sc,i)=>{
   else if(sc.type==='type'){h=(sc.title?`<div class="title">${md(sc.title)}</div>`:'')+(sc.style==='terminal'?`<div class="terminal"><span class="tx"></span><span class="caret"></span></div>`:`<div class="search"><span>🔍</span><span><span class="tx"></span><span class="caret"></span></span></div>`)+(sc.sub?`<div class="typed-sub">${md(sc.sub)}</div>`:'')}
   else if(sc.type==='notif'){h=`<div class="phone">${sc.title?`<div class="ptitle">${md(sc.title)}</div>`:''}${sc.items.map(it=>`<div class="nt"><div class="i">${it.icon||'🔔'}</div><div><div class="a">${it.app||''}</div><div class="x">${md(it.text)}</div></div></div>`).join('')}</div>`}
   else if(sc.type==='custom'){h=sc.html}
-  el.innerHTML=h;$('#stage').appendChild(el);return el;
+  el.innerHTML=h;$('#stage').appendChild(el);
+  if(heroChar){const spec=typeof sc.hero==='object'?sc.hero:{p:sc.hero.slice(5)};const box=PERSONAJES.build(spec).box;const H0=spec.alto||(box[3]>600?460:330);const r=PERSONAJES.heroSvg(spec,Math.round(H0*box[2]/box[3]),H0);el.querySelector('.hero.char').appendChild(r.el);el._heroUpd=r.upd}
+  return el;
 });
 // íconos 3D flotantes por escena: solo en huecos que no tapen el contenido
 const SLOTS=[[50,280,180],[850,300,170],[40,1090,170],[860,1070,180],[30,620,150],[900,640,150]];
@@ -210,6 +215,13 @@ fltEls=V.scenes.map((sc,i)=>{const names=sc.floats??V.meta.floats??[];
   const order=SLOTS.map((s2,k)=>SLOTS[(k+i*2)%4<4&&k<4?(k+i*2)%4:k]);
   const free=order.filter(([x,y,w])=>!rs.some(r=>hit({x,y,w},r)));
   return names.slice(0,free.length).map((n,j)=>{const im=document.createElement('img');im.className='flt';im.src='fl_'+n+'.png';const s=free[j];im.style.width=im.style.height=s[2]+'px';im.style.left=s[0]+'px';im.style.top=s[1]+'px';im.style.opacity=0;$('#floats').appendChild(im);return im})});
+// personajes en escena: sc.chars=[{p, x, y, escala, voltear, anim, vel, ...}]
+const charLayers=V.scenes.map((sc,i)=>{if(!sc.chars||!sc.chars.length)return null;
+  const sv=document.createElementNS(NS,'svg');sv.setAttribute('viewBox','0 0 1080 1920');sv.style.cssText='position:absolute;inset:0;width:1080px;height:1920px;overflow:visible;opacity:0';
+  const items=sc.chars.map((c,j)=>{const spec=typeof c==='string'?{p:c}:c;const r=PERSONAJES.build(spec);const g=document.createElementNS(NS,'g');const inner=document.createElementNS(NS,'g');inner.innerHTML=r.svg;g.appendChild(inner);sv.appendChild(g);
+    const cache={};const Q=s=>cache[s]||(cache[s]=[...g.querySelectorAll(s)]);
+    const def=[[230,1330],[850,1330],[540,1330]][j%3];return {spec,g,inner,Q,r,x:spec.x??def[0],y:spec.y??def[1],e:spec.escala??(r.box[3]>600?0.6:0.7)}});
+  $('#chars').appendChild(sv);return {sv,items}});
 function seek(t){
   const T=V.total;
   $('#bar').style.width=(100*t/T)+'%';
@@ -222,6 +234,9 @@ function seek(t){
   let z=0,eo=0;Object.entries(bgCache).forEach(([k,b])=>{const o=act[k]||0;b.L.style.opacity=o;b.L.style.zIndex=(o>0&&o<1)?2:1;if(o>0)b.upd(b.lt||0,t);if(b.esc)eo=Math.max(eo,o)});
   // con escenario ilustrado: sin cuadrícula ni puntos, y un poco menos de oscurecido
   $('#grid').style.opacity=1-eo;$('#dots').style.opacity=1-eo;$('#glow').style.opacity=1-0.6*eo;$('#dim').style.opacity=1-0.15*eo;
+  charLayers.forEach((L,i)=>{if(!L)return;const sc=V.scenes[i],lt=t-sc.start,on=lt>=0&&lt<sc.dur;L.sv.style.opacity=on?1:0;if(!on)return;
+    L.items.forEach((c,j)=>{const q=eBack((lt-0.15-j*0.15)/0.5);const fx=c.spec.voltear?-1:1;const dx=(c.spec.anim==='caminar'?(c.spec.vel??110)*lt*fx:0);
+      c.g.setAttribute('transform',`translate(${(c.x+dx).toFixed(1)},${c.y}) scale(${(c.e*fx).toFixed(3)},${c.e})`);c.inner.setAttribute('transform',`scale(${Math.max(0,q).toFixed(3)})`);c.inner.style.opacity=clamp((lt-0.15-j*0.15)/0.15);c.r.upd(c.Q,lt,t)})});
   fltEls.forEach((arr,i)=>{const sc=V.scenes[i],lt=t-sc.start;arr.forEach((im,j)=>{const on=lt>=0&&lt<sc.dur;if(!on){im.style.opacity=0;return}const q=eBack((lt-0.1-j*0.12)/0.5);im.style.opacity=clamp((lt-0.1-j*0.12)/0.2)*0.95;im.style.transform=`translateY(${Math.sin(lt*1.6+j)*18}px) rotate(${Math.sin(lt*1.1+j*2)*8}deg) scale(${q})`})});
   V.scenes.forEach((sc,i)=>{
     const el=els[i],lt=t-sc.start,on=lt>=0&&lt<sc.dur;
@@ -239,6 +254,7 @@ function seek(t){
     if(sc.type==='bullets')rev(el.querySelectorAll('.item'));
     if(sc.type==='timeline')rev(el.querySelectorAll('.tli'));
     if(sc.type==='compare'){const c=el.querySelectorAll('.col');rev(c)}
+    if(el._heroUpd)el._heroUpd(lt,t);
     el.querySelectorAll('.big-emoji,.hero').forEach(b=>{b.style.transform=`translateY(${Math.sin(lt*3)*14}px) rotate(${Math.sin(lt*2)*5}deg) scale(${eBack(lt/0.45)})`});
     if(sc.type==='end'){const l=el.querySelector('.logo');l.style.transform=`scale(${eBack(lt/0.5)})`}
     if(sc.type==='chart'){el.querySelectorAll('.bar').forEach((b,j)=>{const at=(ev[j]??sc.start+0.3)-sc.start;const q=eOut((lt-at)/0.6);b.querySelector('.f').style.transform=`scaleY(${q})`;b.querySelector('.n').style.opacity=clamp((lt-at-0.3)/0.2)})}

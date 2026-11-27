@@ -45,6 +45,26 @@ El usuario no quiere más el fondo azul cuadriculado: **cada escena debe ir sobr
 
 Reglas: cambia de escenario entre escenas (fundido automático) y elige el que mejor represente lo que dice esa escena; con un escenario activo la cuadrícula y los puntos se ocultan solos. Los fondos genéricos de abajo quedan como complemento (máximo 1-2 escenas por video). Si el tema necesita un lugar que no existe (p. ej. un desierto, un estadio, una fábrica), **agrégalo a `scenes.js`** siguiendo el mismo patrón (función que devuelve `{svg, upd(Q, lt, t)}` y entrada en `LIST`) y documéntalo en esta tabla. Con escenario, usa como máximo 2 `floats` para no recargar. Los textos ya traen sombra y recuadro oscuro para leerse sobre el escenario. Probar todos: `bg` de cada escena en un video de prueba y `render.js --frames`.
 
+### Personajes ilustrados (desde 2026-11-26, pedido del usuario)
+`characters.js` dibuja personas, oficios y animales en el mismo estilo plano (SVG, paleta de la marca), con parpadeo y animaciones. Sirven para contar historias: un rey, una persona morena, un astronauta con o sin casco, un escarabajo, etc. No son personas reales: nunca intentes imitar a una figura pública real (usa un personaje genérico con el oficio o el rol).
+
+Dos formas de usarlos en una escena:
+- **Protagonista grande** sobre el texto (reemplaza al ícono 3D): `"hero":{"p":"astronauta","casco":false,"piel":"morena","pose":"saludar"}` o corto `"hero":"char:rey"`. Con personaje como hero, usa textos cortos (1-2 líneas).
+- **Dentro de la escena** (encima del escenario, detrás del texto): `"chars":[{"p":"rey","x":230,"y":1330,"escala":0.6,"anim":"caminar","vel":90}, {"p":"escarabajo","x":850,"y":1300}]`. `x,y` = posición de los pies en el lienzo 1080x1920; `escala` ≈ 0.4-0.7 para personas (0.6 ≈ 450 px de alto) y 0.5-1 para animales; `voltear:true` lo mira al otro lado. Ubícalos donde no tapen el texto (laterales bajos, junto a un escenario o en escenas con poco texto) y revísalo en los fotogramas.
+
+Opciones de personas:
+- `p` (preset): `persona`, `mujer`, `rey`, `reina`, `astronauta`, `vikingo`, `chef`, `doctor`, `cientifico`, `programador`, `hacker`, `ejecutivo`, `obrero`, `repartidor`, `estudiante`, `pirata`, `detective`.
+- `piel`: `clara`, `media`, `trigueña`, `morena`, `oscura` (o un color #hex). `figura`: `hombre`/`mujer`.
+- `pelo`: `corto`, `largo`, `rizado`, `afro`, `coleta`, `moño`, `calvo`; `color_pelo`: `negro`, `castaño`, `rubio`, `pelirrojo`, `canoso`, `blanco` (o #hex). `barba`: `corta`, `larga`, `bigote`, `no`.
+- Ropa: `camisa`, `pantalon`, `zapatos` (#hex), `inferior`: `pantalon`/`falda`/`vestido`, `manga`: `corta`/`larga`; extras: `gafas` (`normal`/`proteccion`), `sombrero` (`vikingo`, `chef`, `casco_obra`, `gorra`, `pirata`, `detective`), `corona` (`rey`/`reina`), `capa` (#hex), `bata`, `saco`, `corbata`, `chaleco`, `mochila`, `audifonos`, `capucha` (`atras`/`puesta`), `parche`.
+- Astronauta: `casco:true|false`, `visor:true` (visor dorado que tapa la cara). Sin casco puede llevarlo en la mano: `"objeto":"casco"`.
+- `pose`: `normal`, `saludar`, `señalar`, `celebrar`, `pensar`, `sostener`, `mostrar`. `expresion`: `feliz`, `sorpresa`, `serio`, `hablar` (boca animada). `anim`: `respirar` (por defecto), `caminar` (+`vel` px/s), `saltar`, `flotar` (astronautas), `hablar`.
+- `objeto` en la mano: `cetro`, `laptop`, `caja`, `telefono`, `libro`, `lupa`, `escudo`, `cuchara`, `matraz`, `bandera`, `taza`, `catalejo`, `casco`, `tarjeta`, `corazon`, `ninguno`.
+
+Animales y criaturas (`p`): `escarabajo` (`color` para variar; `dorado` = escarabajo egipcio), `hormiga`, `abeja`, `mariposa`, `perro`, `gato`, `pajaro` (`anim:"volar"`), `robot` (`pose:"saludar"`), `pinguino`. Miran a la derecha; `voltear:true` los gira.
+
+Si hace falta un personaje que no existe (p. ej. un dinosaurio, un faraón, un médico con tapabocas), **agrégalo a `characters.js`**: un preset nuevo en `PRESETS` (combinando las piezas existentes) o una criatura nueva en `bicho()`, y documéntalo aquí. Para revisar: escena `custom` con varios `chars` y `render.js --frames`.
+
 ### Fondos genéricos e imágenes
 - `bg` (por escena o global): `map` (mapa mundial con conexiones; `focus`: bogota, ny, sf, madrid, london, tokio, saopaulo, cdmx, sydney, dubai, lagos, mumbai), `city` (ciudad de noche), `servers` (centro de datos), `circuit` (circuito con pulsos), `code` (código en movimiento), `retro` (estética años 80), o `img:archivo.jpg` (foto propia copiada a la carpeta del video). Cambia de fondo entre escenas; hacen fundido automático.
 - `hero`: imagen 3D grande sobre el texto (reemplaza a `emoji`).
