@@ -29,6 +29,8 @@
     repartidor: { camisa: C.oro, pantalon: '#1b2a6b', zapatos: '#101943', manga: 'corta', sombrero: 'gorra', pelo: 'corto', objeto: 'caja' },
     estudiante: { camisa: '#5b7fd6', pantalon: '#1b2a6b', zapatos: '#f4f6fb', mochila: '#d9433b', pelo: 'corto', objeto: 'libro', manga: 'corta' },
     pirata: { camisa: '#f4f1e8', pantalon: '#1f1a17', zapatos: '#3a2a1e', sombrero: 'pirata', parche: true, barba: 'corta', color_pelo: 'negro', cinturon: '#d9433b', pelo: 'largo', objeto: 'catalejo' },
+    ceo: { camisa: '#1a1a1f', pantalon: '#22242e', zapatos: '#101010', chaqueta: '#202027', pelo: 'corto', color_pelo: '#5b5d66', piel: 'media' },
+    espia: { figura: 'mujer', camisa: '#2b2f45', pantalon: '#2b2f45', zapatos: '#101010', gabardina: '#6a7396', panuelo: '#d9433b', sombrero: 'detective', gafas: 'sol', pelo: 'largo', color_pelo: 'negro', expresion: 'serio' },
     detective: { camisa: '#a07850', pantalon: '#5a3a22', zapatos: '#3a2a1e', gabardina: '#a07850', sombrero: 'detective', pelo: 'corto', objeto: 'lupa' },
   };
   const POSES = { // [ángulo brazo izq, codo izq, ángulo brazo der, codo der]
@@ -93,6 +95,7 @@
     body += `<path d="M-${torsoW - 10},-548 Q-${torsoW},-548 -${torsoW},-520 L-${torsoW - 8},-300 L${torsoW - 8},-300 L${torsoW},-520 Q${torsoW},-548 ${torsoW - 10},-548Z" fill="${shirt}"/>`;
     if (astro) body += `<rect x="-60" y="-500" width="120" height="80" rx="14" fill="#dfe6f5"/><rect x="-45" y="-488" width="22" height="22" rx="4" fill="#d9433b"/><rect x="-14" y="-488" width="22" height="22" rx="4" fill="${C.cel}"/><rect x="17" y="-488" width="22" height="22" rx="4" fill="${C.oro}"/><rect x="-40" y="-455" width="80" height="12" rx="6" fill="#9aa7c7"/><circle cx="70" cy="-530" r="14" fill="${C.oro}"/>`;
     if (P.saco) body += `<path d="M-${torsoW},-520 L-${torsoW - 8},-300 L-10,-300 L-22,-548 Q-${torsoW},-548 -${torsoW},-520Z" fill="${shade(shirt, 0.9)}"/><path d="M${torsoW},-520 L${torsoW - 8},-300 L10,-300 L22,-548 Q${torsoW},-548 ${torsoW},-520Z" fill="${shade(shirt, 0.9)}"/><path d="M-22,-548 L22,-548 L0,-470Z" fill="#f4f6fb"/>`;
+    if (P.chaqueta) { const k = P.chaqueta; body += `<path d="M-${torsoW},-520 L-${torsoW - 8},-300 L-26,-300 L-20,-548 Q-${torsoW},-548 -${torsoW},-520Z" fill="${k}"/><path d="M${torsoW},-520 L${torsoW - 8},-300 L26,-300 L20,-548 Q${torsoW},-548 ${torsoW},-520Z" fill="${k}"/><path d="M-20,-548 L-46,-548 L-30,-470Z M20,-548 L46,-548 L30,-470Z" fill="${shade(k, 1.6)}"/><path d="M-60,-500 L-66,-330 M62,-500 L58,-330" stroke="#fff" stroke-opacity=".12" stroke-width="6"/><rect x="-28" y="-470" width="4" height="160" fill="#9aa7c7" opacity=".6"/>` }
     if (P.corbata) body += `<path d="M-9,-540 L9,-540 L14,-400 L0,-380 L-14,-400Z" fill="${P.corbata}"/>`;
     if (P.bata) body += `<path d="M-${torsoW + 6},-520 L-${torsoW + 2},-170 L-18,-170 L-26,-548 Q-${torsoW},-550 -${torsoW + 6},-520Z" fill="#f4f6fb"/><path d="M${torsoW + 6},-520 L${torsoW + 2},-170 L18,-170 L26,-548 Q${torsoW},-550 ${torsoW + 6},-520Z" fill="#f4f6fb"/><rect x="40" y="-470" width="34" height="8" fill="${C.cel}"/>`;
     if (P.gabardina) body += `<path d="M-${torsoW + 6},-520 L-${torsoW + 20},-130 L-14,-130 L-26,-548 Q-${torsoW},-550 -${torsoW + 6},-520Z" fill="${P.gabardina}"/><path d="M${torsoW + 6},-520 L${torsoW + 20},-130 L14,-130 L26,-548 Q${torsoW},-550 ${torsoW + 6},-520Z" fill="${P.gabardina}"/><rect x="-${torsoW + 4}" y="-330" width="${2 * torsoW + 8}" height="18" fill="${shade(P.gabardina, 0.7)}"/>`;
@@ -104,7 +107,7 @@
     if (P.panuelo) body += `<path d="M-40,-552 L40,-552 L0,-500Z" fill="${P.panuelo}"/>`;
     if (P.capucha === 'atras') body += `<path d="M-70,-560 Q0,-520 70,-560 Q60,-600 0,-602 Q-60,-600 -70,-560Z" fill="${shade(shirt, 0.82)}"/><path d="M-20,-520 L-24,-430 M20,-520 L24,-430" stroke="#f4f6fb" stroke-width="5"/>`;
     // brazos
-    const sleeve = astro ? '#eef2fb' : (P.bata ? '#f4f6fb' : P.saco ? shade(shirt, 0.9) : P.gabardina ? P.gabardina : shirt);
+    const sleeve = astro ? '#eef2fb' : P.chaqueta ? P.chaqueta : (P.bata ? '#f4f6fb' : P.saco ? shade(shirt, 0.9) : P.gabardina ? P.gabardina : shirt);
     const fore = longSleeve ? sleeve : skin, hand = astro ? '#9aa7c7' : skin;
     const item = (k, tot) => k && ITEMS[k] ? `<g transform="translate(0,112) rotate(${-tot})">${ITEMS[k]}</g>` : '';
     const arm = (side, a, e, it) => `<g class="arm${side}" transform="translate(${side === 'L' ? -(torsoW - 4) : torsoW - 4},-525) rotate(${a})"><line x1="0" y1="0" x2="0" y2="118" stroke="${sleeve}" stroke-width="46" stroke-linecap="round"/><g class="fore${side}" transform="translate(0,118) rotate(${e})"><line x1="0" y1="0" x2="0" y2="96" stroke="${fore}" stroke-width="40" stroke-linecap="round"/>${astro ? `<rect x="-24" y="70" width="48" height="16" fill="#c9d1e8"/>` : ''}<circle cx="0" cy="110" r="25" fill="${hand}"/>${it}</g></g>`;
@@ -138,6 +141,7 @@
       if (pelo === 'calvo') head += `<path d="M-80,-650 Q-82,-680 -70,-690 L-66,-640Z M80,-650 Q82,-680 70,-690 L66,-640Z" fill="${hair}"/>`;
     }
     if (P.gafas === 'proteccion') head += `<rect x="-62" y="-700" width="124" height="34" rx="16" fill="${C.cel}" fill-opacity=".6" stroke="#5a6290" stroke-width="5"/>`;
+    if (P.gafas === 'sol') head += `<rect x="-52" y="-666" width="44" height="30" rx="12" fill="#101018"/><rect x="8" y="-666" width="44" height="30" rx="12" fill="#101018"/><path d="M-8,-656 L8,-656" stroke="#101018" stroke-width="5"/><rect x="-44" y="-660" width="14" height="6" rx="3" fill="#fff" opacity=".35"/><rect x="16" y="-660" width="14" height="6" rx="3" fill="#fff" opacity=".35"/>`;
     if (P.gafas === 'normal') head += `<circle cx="-27" cy="-650" r="20" fill="none" stroke="#1d2240" stroke-width="5"/><circle cx="27" cy="-650" r="20" fill="none" stroke="#1d2240" stroke-width="5"/><path d="M-7,-652 L7,-652" stroke="#1d2240" stroke-width="5"/>`;
     if (P.parche) head += `<path d="M-80,-690 L60,-620" stroke="#1f1a17" stroke-width="5"/><ellipse cx="27" cy="-650" rx="20" ry="18" fill="#1f1a17"/>`;
     if (P.audifonos) head += `<path d="M-84,-640 Q-84,-748 0,-748 Q84,-748 84,-640" stroke="#101943" stroke-width="14" fill="none"/><rect x="-100" y="-668" width="30" height="56" rx="12" fill="${C.oro}"/><rect x="70" y="-668" width="30" height="56" rx="12" fill="${C.oro}"/>`;

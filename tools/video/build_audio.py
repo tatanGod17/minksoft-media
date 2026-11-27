@@ -19,7 +19,53 @@ KDIR = os.environ.get("KOKORO_DIR", os.path.expanduser("~/kokoro"))
 voice = spec.get("voice", "piper:es_ES-davefx-medium")
 speed = float(spec.get("speed", 1.0))
 
-if voice.startswith("piper:"):
+def _eleven(voice_ref):
+    """Devuelve _raw(text) con ElevenLabs, o None si no hay clave/acceso (se usa la voz de respaldo)."""
+    import urllib.request, urllib.parse
+    key = os.environ.get("ELEVENLABS_API_KEY")
+    if not key:
+        print("AVISO: falta ELEVENLABS_API_KEY; uso la voz de respaldo", file=sys.stderr); return None
+    H = {"xi-api-key": key, "Content-Type": "application/json"}
+    def get(url):
+        return json.load(urllib.request.urlopen(urllib.request.Request(url, headers=H), timeout=60))
+    try:
+        vid = voice_ref
+        if not re.fullmatch(r"[A-Za-z0-9]{20}", voice_ref):  # nombre -> id (biblioteca propia, luego biblioteca pública)
+            norm = lambda x: re.sub(r"\s+", " ", x).strip().lower()
+            mine = [v for v in get("https://api.elevenlabs.io/v1/voices").get("voices", []) if norm(v["name"]).startswith(norm(voice_ref))]
+            if mine: vid = mine[0]["voice_id"]
+            else:
+                q = urllib.parse.quote(voice_ref)
+                sh = [v for v in get(f"https://api.elevenlabs.io/v1/shared-voices?search={q}&page_size=20").get("voices", []) if norm(v["name"]).startswith(norm(voice_ref))]
+                if not sh: raise RuntimeError(f"voz '{voice_ref}' no encontrada en ElevenLabs")
+                v = sh[0]; vid = v["voice_id"]
+                try:  # agregarla a la biblioteca propia (necesario para usarla por API)
+                    req = urllib.request.Request(f"https://api.elevenlabs.io/v1/voices/add/{v['public_owner_id']}/{vid}", data=json.dumps({"new_name": v["name"]}).encode(), headers=H, method="POST")
+                    vid = json.load(urllib.request.urlopen(req, timeout=60)).get("voice_id", vid)
+                except Exception as e: print("AVISO al agregar la voz:", e, file=sys.stderr)
+        model = spec.get("eleven_model", "eleven_multilingual_v2")
+        vs = {"stability": 0.45, "similarity_boost": 0.8, "style": 0.25, "use_speaker_boost": True, "speed": speed}
+        def _raw(text):
+            body = json.dumps({"text": text, "model_id": model, "language_code": "es", "voice_settings": vs}).encode()
+            req = urllib.request.Request(f"https://api.elevenlabs.io/v1/text-to-speech/{vid}?output_format=pcm_24000", data=body, headers=H, method="POST")
+            pcm = urllib.request.urlopen(req, timeout=120).read()
+            return (np.frombuffer(pcm, dtype="<i2").astype(np.float32) / 32768.0), SR
+        _raw("Hola.")  # prueba de acceso
+        print(f"Voz ElevenLabs: {voice_ref} ({vid})", file=sys.stderr)
+        return _raw
+    except Exception as e:
+        print(f"AVISO: ElevenLabs no disponible ({e}); uso la voz de respaldo", file=sys.stderr); return None
+
+USED_VOICE = voice
+if voice.startswith("eleven:"):
+    _r = _eleven(voice.split(":", 1)[1])
+    if _r: _raw = _r
+    else:
+        voice = spec.get("voice_fallback", "piper:es_ES-davefx-medium"); USED_VOICE = voice + " (respaldo)"
+
+if voice.startswith("eleven:"):
+    pass
+elif voice.startswith("piper:"):
     # Voces Piper (p. ej. "piper:es_ES-davefx-medium"); modelos en $PIPER_DIR/vits-piper-<nombre>/
     from piper import PiperVoice, SynthesisConfig
     PDIR = os.environ.get("PIPER_DIR", os.path.expanduser("~/tts"))
@@ -171,4 +217,4 @@ sf.write(os.path.join(d, "sfx.wav"), sfx, SR)
 json.dump({"total": round(total, 3), "fps": 30, "scenes": scenes_out,
            "meta": {k2: v for k2, v in spec.items() if k2 != "scenes"}},
           open(os.path.join(d, "timeline.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1)
-print(f"OK duración total {total:.2f}s, escenas {len(scenes_out)}")
+print(f"OK duración total {total:.2f}s, escenas {len(scenes_out)}, voz {USED_VOICE}")
