@@ -86,6 +86,52 @@ else:
     def _raw(text):
         return k.create(text, voice=voice, speed=speed, lang="es")
 
+# ---------- narración grabada aparte (p. ej. descargada de ElevenLabs a mano) ----------
+# "narration_file":"voz.mp3" (en la carpeta del video), "narration_tempo":1.1 (opcional, acelera sin cambiar el tono),
+# "narration_cuts":[t1,t2,...] (opcional: fin de cada frase en segundos, ya con el tempo aplicado).
+# Sin cuts, parte el audio en las pausas que mejor encajan con la longitud de cada "say".
+if spec.get("narration_file"):
+    import subprocess
+    tempo = float(spec.get("narration_tempo", 1.0))
+    pcm = subprocess.run(["ffmpeg", "-v", "error", "-i", os.path.join(d, spec["narration_file"]), "-af", f"atempo={tempo}",
+                          "-f", "f32le", "-ac", "1", "-ar", str(SR), "-"], capture_output=True, check=True).stdout
+    full = np.frombuffer(pcm, np.float32).copy(); dur_full = len(full) / SR
+    says = [sc.get("say", "").strip() for sc in spec["scenes"] if sc.get("say", "").strip()]
+    W = int(0.02 * SR); env = np.sqrt(np.convolve(full ** 2, np.ones(W) / W, mode="same"))
+    quiet = env < float(spec.get("narration_silence", 0.012))
+    sil, k = [], 0
+    while k < len(quiet):
+        if quiet[k]:
+            j = k
+            while j < len(quiet) and quiet[j]: j += 1
+            if (j - k) / SR >= 0.2 and k > 0 and j < len(quiet): sil.append((k / SR, j / SR))
+            k = j
+        else: k += 1
+    if spec.get("narration_cuts"):
+        ends = [float(x) for x in spec["narration_cuts"]]
+        pick = [min(sil, key=lambda s: abs(s[0] - e)) if sil else (e, e) for e in ends]
+    else:
+        n = len(says); L = np.cumsum([len(x) for x in says]); tg = [dur_full * L[i] / L[-1] for i in range(n - 1)]
+        m = len(sil); INF = 1e18
+        # programación dinámica: elegir n-1 pausas en orden, cerca de los objetivos y prefiriendo pausas largas
+        cost = lambda i, j: (sil[j][0] - tg[i]) ** 2 - 0.5 * (sil[j][1] - sil[j][0])
+        D = [[INF] * m for _ in range(n - 1)]; B = [[-1] * m for _ in range(n - 1)]
+        for j in range(m): D[0][j] = cost(0, j)
+        for i in range(1, n - 1):
+            for j in range(i, m):
+                bj = min(range(j), key=lambda q: D[i - 1][q]); D[i][j] = D[i - 1][bj] + cost(i, j); B[i][j] = bj
+        j = min(range(m), key=lambda q: D[n - 2][q]); pick = []
+        for i in range(n - 2, -1, -1): pick.append(sil[j]); j = B[i][j]
+        pick = pick[::-1]
+    bounds, a = [], 0.0
+    for s0, s1 in pick: bounds.append((a, s0 + 0.04)); a = s1 - 0.04
+    bounds.append((a, dur_full))
+    print("Cortes de la narración:", [round(b[1], 2) for b in bounds], file=sys.stderr)
+    _segs = iter([full[int(x * SR):int(y * SR)] for x, y in bounds])
+    def _raw(text):
+        return next(_segs), SR
+    USED_VOICE = "archivo " + spec["narration_file"] + (f" (tempo {tempo})" if tempo != 1 else "")
+
 def tts(text):
     s, sr = _raw(text)
     assert sr == SR
