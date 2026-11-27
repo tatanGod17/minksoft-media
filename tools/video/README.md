@@ -65,6 +65,16 @@ Animales y criaturas (`p`): `escarabajo` (`color` para variar; `dorado` = escara
 
 Si hace falta un personaje que no existe (p. ej. un dinosaurio, un faraón, un médico con tapabocas), **agrégalo a `characters.js`**: un preset nuevo en `PRESETS` (combinando las piezas existentes) o una criatura nueva en `bicho()`, y documéntalo aquí. Para revisar: escena `custom` con varios `chars` y `render.js --frames`.
 
+### Personajes en imágenes fijas (posts de Instagram)
+`node tools/video/snap.js pagina.html salida.png 1080 1350` renderiza un HTML propio con `characters.js` y `scenes.js` ya cargados y los logos de `assets/` copiados junto a la página. Ejemplo dentro de la página (después de crear un `<svg id="scene" viewBox="0 0 1080 420">`):
+```js
+const r = PERSONAJES.build({p:'repartidor', piel:'morena', pose:'sostener'}); // pies en (0,0), ~760 de alto
+const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+g.setAttribute('transform','translate(300,415) scale(0.46)'); g.innerHTML = r.svg; scene.appendChild(g);
+const c = {}; r.upd(s => c[s] || (c[s] = [...g.querySelectorAll(s)]), 0.6, 0.6); // pose final
+```
+o `PERSONAJES.heroSvg(spec, ancho, alto).el` para un `<svg>` listo para insertar. Referencia aprobada por el usuario (2026-11-26): post «El primer mensaje de internet fue… «LO»» con dos personajes junto a computadores antiguos.
+
 ### Fondos genéricos e imágenes
 - `bg` (por escena o global): `map` (mapa mundial con conexiones; `focus`: bogota, ny, sf, madrid, london, tokio, saopaulo, cdmx, sydney, dubai, lagos, mumbai), `city` (ciudad de noche), `servers` (centro de datos), `circuit` (circuito con pulsos), `code` (código en movimiento), `retro` (estética años 80), o `img:archivo.jpg` (foto propia copiada a la carpeta del video). Cambia de fondo entre escenas; hacen fundido automático.
 - `hero`: imagen 3D grande sobre el texto (reemplaza a `emoji`).
