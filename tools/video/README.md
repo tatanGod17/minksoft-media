@@ -44,6 +44,8 @@ El usuario no quiere más el fondo azul cuadriculado: **cada escena debe ir sobr
 | `boveda` | bóveda de seguridad con rueda que gira, teclado y láseres | ciberseguridad, contraseñas, bancos, protección |
 | `garaje` | garaje al atardecer (palmera, casas), banco de trabajo con computador antiguo, bombillo | origen de empresas (Apple, Google, Amazon, HP), emprendimiento |
 | `cielo` | cielo de día con nubes en movimiento, sol, avión y pájaros | "la nube", viajes, aviones, optimismo |
+| `navidad` | mercado navideño de noche: árbol gigante con estrella, guirnaldas de bombillos, casetas de madera con techo nevado, nieve cayendo | Navidad, temporada de fin de año, eventos, "lo que prometía la publicidad" |
+| `galpon` | bodega/galpón vacío: techo con huecos, bombillo que parpadea, mesas plegables casi vacías, baldes recogiendo goteras | decepción, "la realidad", lugares abandonados, promesas incumplidas |
 
 Reglas: cambia de escenario entre escenas (fundido automático) y elige el que mejor represente lo que dice esa escena; con un escenario activo la cuadrícula y los puntos se ocultan solos. Los fondos genéricos de abajo quedan como complemento (máximo 1-2 escenas por video). Si el tema necesita un lugar que no existe (p. ej. un desierto, un estadio, una fábrica), **agrégalo a `scenes.js`** siguiendo el mismo patrón (función que devuelve `{svg, upd(Q, lt, t)}` y entrada en `LIST`) y documéntalo en esta tabla. Con escenario, usa como máximo 2 `floats` para no recargar. Los textos ya traen sombra y recuadro oscuro para leerse sobre el escenario. Probar todos: `bg` de cada escena en un video de prueba y `render.js --frames`.
 

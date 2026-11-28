@@ -317,10 +317,77 @@
     };
   }
 
+  // ---------- mercado navideño mágico (de noche, con nieve, luces y árbol) ----------
+  function navidad(o, id) {
+    const r = R(83); const ROJO = '#d94a4a';
+    let h = `<defs>${lg(id + 'sky', [[0, '#070c2e'], [0.6, '#1b2a6b'], [1, '#2a3a8c']])}${rg(id + 'g', '#ffd27a', 0.55)}${rg(id + 'tr', '#ffd27a', 0.35)}${blur(id + 'b', 6)}</defs>`;
+    h += `<rect width="${W}" height="${H}" fill="url(#${id}sky)"/>${stars(r, 50, 700)}`;
+    h += `<circle cx="880" cy="190" r="70" fill="#f4f1e8"/><circle cx="905" cy="175" r="62" fill="#101943"/>`;
+    h += skyline(r, W, 1000, '#141d55', 0.25);
+    // árbol gigante al centro
+    h += `<ellipse cx="540" cy="760" rx="380" ry="460" fill="url(#${id}tr)"/>`;
+    const tree = [[540, 330], [700, 640], [630, 640], [790, 900], [700, 900], [880, 1180], [200, 1180], [380, 900], [290, 900], [450, 640], [380, 640]];
+    h += `<polygon points="${pts(tree)}" fill="#1f7a55"/><polygon points="${pts([[540, 330], [700, 640], [630, 640], [790, 900], [700, 900], [880, 1180], [540, 1180]])}" fill="#000" opacity=".15"/><rect x="510" y="1180" width="60" height="60" fill="#5a3a22"/>`;
+    h += `<path class="star" d="M540,262 L556,306 L602,306 L565,333 L579,378 L540,351 L501,378 L515,333 L478,306 L524,306Z" fill="${C.oro}" stroke="#fff4d6" stroke-width="3"/>`;
+    for (const [y, w] of [[560, 120], [800, 230], [1060, 330]]) { h += `<path d="M${540 - w},${y} Q540,${y + 70} ${540 + w},${y - 20}" stroke="${C.oro}" stroke-width="7" fill="none"/>`; for (let i = 0; i <= 6; i++) { const q = i / 6, x = 540 - w + 2 * w * q, yy = y + (1 - (2 * q - 1) ** 2) * 35 - q * 20; h += `<circle class="orn" cx="${f(x)}" cy="${f(yy + 14)}" r="14" fill="${[ROJO, C.cel, '#fff4d6'][i % 3]}"/>` } }
+    // guirnaldas de bombillos
+    for (const [y0, sag] of [[160, 120], [380, 90]]) { h += `<path d="M-20,${y0} Q540,${y0 + sag * 2} 1100,${y0}" stroke="#0b1340" stroke-width="4" fill="none"/>`; for (let i = 0; i < 18; i++) { const q = i / 17, x = -20 + 1120 * q, y = y0 + 4 * sag * q * (1 - q) * 1.0; h += `<circle class="lb" cx="${f(x)}" cy="${f(y + 12)}" r="11" fill="${[C.oro, ROJO, C.cel, '#7CFFB2'][i % 4]}"/>` } }
+    // casetas de madera con techo nevado
+    const booth = (x, y, s, aw) => `<g transform="translate(${x},${y}) scale(${s})"><rect x="-130" y="-170" width="260" height="190" fill="#8a5a2b"/>${[...Array(6)].map((_, i) => `<rect x="-130" y="${-170 + i * 32}" width="260" height="3" fill="#6b4423"/>`).join('')}<rect x="-110" y="-140" width="220" height="90" fill="#ffd27a" opacity=".85"/><rect x="-110" y="-60" width="220" height="16" fill="#5a3a22"/>${[...Array(5)].map((_, i) => `<circle cx="${-88 + i * 44}" cy="-80" r="13" fill="${[ROJO, C.cel, C.oro][i % 3]}"/>`).join('')}<path d="M-160,-170 L0,-260 L160,-170Z" fill="${aw}"/><path d="M-160,-170 L0,-260 L160,-170 L140,-160 L0,-238 L-140,-160Z" fill="#f4f1e8"/>${[...Array(8)].map((_, i) => `<path d="M${-150 + i * 38},-170 a19,16 0 0 0 38,0Z" fill="${i % 2 ? '#f4f1e8' : aw}"/>`).join('')}</g>`;
+    h += booth(150, 1330, 0.95, ROJO) + booth(930, 1330, 0.95, '#1f7a55');
+    h += `<rect x="0" y="1340" width="${W}" height="600" fill="#e6eeff"/><path d="M0,1340 Q270,1300 540,1345 T1080,1330 L1080,1400 L0,1400Z" fill="#f4f8ff"/><rect x="0" y="1520" width="${W}" height="420" fill="#c9d6f5"/>`;
+    h += `<ellipse cx="540" cy="1180" rx="300" ry="60" fill="url(#${id}g)"/>${flakes(r, 70)}`;
+    return {
+      svg: h, upd(Q, lt, t) {
+        twinkle(Q, t); snowfall(Q, t);
+        Q('.lb').forEach((e, i) => e.setAttribute('opacity', f(0.45 + 0.55 * Math.abs(Math.sin(t * 2.2 + i * 0.9)))));
+        Q('.orn').forEach((e, i) => e.setAttribute('opacity', f(0.7 + 0.3 * Math.sin(t * 3 + i))));
+        Q('.star')[0].setAttribute('transform', `translate(540,320) scale(${f(1 + 0.06 * Math.sin(t * 3))}) translate(-540,-320)`);
+      }
+    };
+  }
+
+  // ---------- galpón vacío con goteras y baldes ----------
+  function galpon(o, id) {
+    const r = R(97);
+    let h = `<defs>${lg(id + 'wall', [[0, '#2a3358'], [1, '#1a2146']])}${lg(id + 'cone', [[0, '#fff6d6', 0.28], [1, '#fff6d6', 0]])}${rg(id + 'pd', '#A9C8FF', 0.35)}</defs>`;
+    h += `<rect width="${W}" height="${H}" fill="url(#${id}wall)"/>`;
+    for (let x = 0; x < W; x += 54) h += `<rect x="${x}" y="0" width="26" height="1330" fill="#323c66" opacity=".55"/>`;
+    // techo con vigas y huecos
+    h += `<rect x="0" y="0" width="${W}" height="120" fill="#141a3a"/>${[...Array(7)].map((_, i) => `<path d="M${i * 180 - 40},120 L${i * 180 + 50},20 L${i * 180 + 140},120" stroke="#3b4570" stroke-width="12" fill="none"/>`).join('')}<rect x="0" y="112" width="${W}" height="16" fill="#3b4570"/>`;
+    for (const x of [230, 610, 860]) h += `<path d="M${x - 20},120 l12,-14 l14,10 l10,-12 l8,16Z" fill="#0b0f26"/>`;
+    // manchas de humedad
+    for (const [x, y, rx] of [[240, 200, 70], [620, 230, 90], [870, 190, 60]]) h += `<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${rx * 0.6}" fill="#151b3d" opacity=".6"/>`;
+    // ventanas altas sucias
+    for (const x of [90, 420, 750]) h += `<rect x="${x}" y="300" width="240" height="120" fill="#3d4a7a"/><rect x="${x + 8}" y="308" width="224" height="104" fill="#5b6a99" opacity=".5"/><line x1="${x + 120}" y1="300" x2="${x + 120}" y2="420" stroke="#2a3358" stroke-width="8"/>`;
+    // bombillo colgante que parpadea
+    h += `<g class="bl"><line x1="540" y1="120" x2="540" y2="560" stroke="#0b0f26" stroke-width="4"/><polygon class="cn" points="510,600 570,600 820,1340 260,1340" fill="url(#${id}cone)"/><path d="M505,600 L575,600 L560,566 L520,566Z" fill="#3b4570"/><circle class="bu" cx="540" cy="606" r="16" fill="#fff1c2"/></g>`;
+    // piso de cemento
+    h += `<rect x="0" y="1330" width="${W}" height="600" fill="#2c3352"/><rect x="0" y="1330" width="${W}" height="10" fill="#3b4570"/>${[...Array(6)].map((_, i) => `<line x1="${i * 216}" y1="1340" x2="${i * 216 - 120}" y2="1920" stroke="#252b48" stroke-width="4"/>`).join('')}`;
+    // mesa plegable casi vacía y una guirnalda caída
+    h += `<rect x="70" y="1250" width="300" height="20" fill="#9aa3bf"/><line x1="100" y1="1270" x2="80" y2="1360" stroke="#7d86a3" stroke-width="8"/><line x1="340" y1="1270" x2="360" y2="1360" stroke="#7d86a3" stroke-width="8"/><rect x="120" y="1215" width="60" height="35" fill="#c98a4b"/><path d="M370,1262 Q420,1340 470,1300" stroke="#1f7a55" stroke-width="10" fill="none"/>`;
+    h += `<rect x="760" y="1260" width="260" height="20" fill="#9aa3bf"/><line x1="790" y1="1280" x2="775" y2="1360" stroke="#7d86a3" stroke-width="8"/><line x1="990" y1="1280" x2="1005" y2="1360" stroke="#7d86a3" stroke-width="8"/>`;
+    // baldes con goteras
+    const B = [[230, 1440], [520, 1500], [860, 1450], [400, 1640], [700, 1660]];
+    B.forEach(([x, y], i) => {
+      h += `<ellipse cx="${x}" cy="${y + 50}" rx="90" ry="18" fill="url(#${id}pd)"/><path d="M${x - 50},${y - 40} L${x + 50},${y - 40} L${x + 40},${y + 45} L${x - 40},${y + 45}Z" fill="${['#3b7bd6', '#d94a4a', '#e8b03a', '#5b6a99', '#3b7bd6'][i]}"/><ellipse cx="${x}" cy="${y - 40}" rx="50" ry="12" fill="#0b1340"/><path d="M${x - 50},${y - 40} Q${x},${y - 110} ${x + 50},${y - 40}" stroke="#c9d1e8" stroke-width="4" fill="none"/>`;
+      h += `<path class="dp" data-x="${x}" data-y="${y - 40}" d="M0,-14 Q8,0 0,6 Q-8,0 0,-14Z" fill="#A9C8FF"/><ellipse class="sp" data-x="${x}" data-y="${y - 40}" cx="0" cy="0" rx="10" ry="3" fill="none" stroke="#A9C8FF" stroke-width="3"/>`;
+    });
+    return {
+      svg: h, upd(Q, lt, t) {
+        const fl = (Math.floor(t * 7) % 13 === 0 || Math.floor(t * 7) % 29 === 3) ? 0.25 : 1;
+        Q('.cn')[0].setAttribute('opacity', fl); Q('.bu')[0].setAttribute('opacity', f(0.4 + 0.6 * fl));
+        Q('.bl')[0].setAttribute('transform', `rotate(${f(Math.sin(t * 0.8) * 1.5)} 540 120)`);
+        Q('.dp').forEach((e, i) => { const q = ((t * 0.9 + i * 0.37) % 1), y0 = 130, y1 = +e.dataset.y; e.setAttribute('transform', `translate(${e.dataset.x},${f(y0 + (y1 - y0) * q * q)})`); e.setAttribute('opacity', q < 0.97 ? 1 : 0) });
+        Q('.sp').forEach((e, i) => { const q = ((t * 0.9 + i * 0.37) % 1); const k = q < 0.25 ? q / 0.25 : 0; e.setAttribute('transform', `translate(${e.dataset.x},${e.dataset.y}) scale(${f(1 + k * 4)})`); e.setAttribute('opacity', f(k ? 1 - k : 0)) });
+      }
+    };
+  }
+
   const LIST = {
     montanas: (o, id) => mountains(o, id, false),
     vikingo: (o, id) => mountains(o, id, true),
-    oficina, casa, tienda, bodega, espacio, oceano, boveda, garaje, cielo,
+    oficina, casa, tienda, bodega, espacio, oceano, boveda, garaje, cielo, navidad, galpon,
   };
   let n = 0;
   window.ESCENAS = {
